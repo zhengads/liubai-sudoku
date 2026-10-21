@@ -1,0 +1,20 @@
+{
+  "name": "liubai-sudoku",
+  "version": "1.0.0",
+  "private": true,
+  "description": "留白数独：支持多尺寸棋盘、独立存档、讲解式提示和本地轻音乐的网页游戏。",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "prestart": "npm run build",
+    "start": "node scripts/serve.cjs",
+    "build": "node scripts/build.cjs",
+    "test": "node --test test/*.test.cjs",
+    "format": "prettier --write src scripts test .github README.md package.json .prettierrc.json",
+    "format:check": "prettier --check src scripts test .github README.md package.json .prettierrc.json"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#edf2ed" />
+    <meta name="description" content="留白数独。可收起数字键盘、草稿与独立关卡存档。" />
+    <title>留白 · 数独</title>
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="engine.js" defer></script>
+    <script src="progress.js" defer></script>
+    <script src="music.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body class="at-home">
+    <div class="welcome" id="welcome" role="region" aria-label="留白数独开场">
+      <div class="welcome-composition">
+        <div class="welcome-words">
+          <div class="welcome-line">
+            <span style="--i: 0">在</span><span style="--i: 1">方</span
+            ><span style="--i: 2">寸</span><span style="--i: 3">之</span
+            ><span style="--i: 4">间</span>
+          </div>
+          <div class="welcome-line welcome-second">
+            <span style="--i: 3">找</span><span style="--i: 4">回</span
+            ><span style="--i: 5">专</span><span style="--i: 6">注</span>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="welcome-enter">轻触进入</button>
+    </div>
+    <svg class="svg-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <symbol id="i-pencil" viewBox="0 0 24 24">
+          <path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6Z" />
+        </symbol>
+        <symbol id="i-undo" viewBox="0 0 24 24">
+          <path d="m8 4-5 5 5 5M3 9h10a7 7 0 0 1 0 14" transform="translate(0 -2)" />
+        </symbol>
+        <symbol id="i-erase" viewBox="0 0 24 24">
+          <path
+            d="m14 3 7 7a2 2 0 0 1 0 3l-7 8H9l-6-6a2 2 0 0 1 0-3l8-9a2 2 0 0 1 3 0ZM7 8l9 9M9 21h13"
+          />
+        </symbol>
+        <symbol id="i-bulb" viewBox="0 0 24 24">
+          <path d="M9 18v-2c0-2-4-3-4-7a7 7 0 0 1 14 0c0 4-4 5-4 7v2ZM9 21h6M8 17h8" />
+        </symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6" /></symbol>
+        <symbol id="i-clock" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 2" />
+        </symbol>
+        <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14" /></symbol>
+        <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 4 12 8-12 8Z" /></symbol>
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5L20 6" /></symbol>
+        <symbol id="i-sun" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 1v2M12 21v2M1 12h2M21 12h2M4 4l2 2M18 18l2 2M4 20l2-2M18 6l2-2" />
+        </symbol>
+        <symbol id="i-help" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 5M12 17h.01" />
+        </symbol>
+        <symbol id="i-warning" viewBox="0 0 24 24">
+          <path
+            d="m10 4-8 14a2 2 0 0 0 2 3h16a2 2 0 0 0 2-3L14 4a2 2 0 0 0-4 0Z M12 9v5M12 17h.01"
+          />
+        </symbol>
+        <symbol id="i-music" viewBox="0 0 24 24">
+          <path d="M9 18V5l11-2v13M9 8l11-2" />
+          <ellipse cx="6" cy="18" rx="3" ry="3" />
+          <ellipse cx="17" cy="16" rx="3" ry="3" />
+        </symbol>
+      </defs>
+    </svg>
+
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="留白数独首页"
+        ><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span
+        ><span>留白<span class="brand-divider">/</span><span class="brand-sub">数独</span></span></a
+      >
+      <div class="header-actions">
+        <button
+          class="music-button"
+          id="music-toggle"
+          role="switch"
+          aria-checked="true"
+          aria-label="轻音乐"
+          title="关闭轻音乐"
+        >
+          <svg aria-hidden="true"><use href="#i-music" /></svg><span id="music-label">轻音乐</span
+          ><span class="music-switch" aria-hidden="true"
+            ><span id="music-state">开启</span><i></i
+          ></span></button
+        ><button class="quiet-button" id="help-button" aria-label="玩法指南">
+          <svg><use href="#i-help" /></svg><span>玩法指南</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section id="home-screen" class="home-screen" aria-labelledby="home-title">
+        <div class="home-art" aria-hidden="true">
+          <span>1</span><span></span><span>3</span><span></span><span>5</span><span></span
+          ><span>7</span><span></span><span>9</span>
+        </div>
+        <div class="home-menu">
+          <h1 id="home-title">在方寸之间<br />找回专注</h1>
+          <p id="home-save" class="home-save"></p>
+          <div class="home-actions">
+            <button id="home-continue" class="primary-button">
+              开始游戏<svg aria-hidden="true"><use href="#i-arrow" /></svg></button
+            ><button id="home-restart" class="home-secondary">
+              重新开始<svg aria-hidden="true"><use href="#i-undo" /></svg></button
+            ><button id="home-catalog" class="home-secondary">
+              关卡目录<span aria-hidden="true">▦</span>
+            </button>
+          </div>
+        </div>
+      </section>
+      <section id="game-screen" class="game-shell" aria-label="数独游戏" hidden>
+        <div class="saved-state" id="save-state" role="status" hidden></div>
+        <div class="puzzle-config">
+          <span id="stage-label" class="stage-current"></span>
+          <div class="timer">
+            <svg aria-hidden="true"><use href="#i-clock" /></svg><span id="timer">00:00</span
+            ><button id="pause" aria-label="暂停游戏" title="暂停游戏">
+              <svg><use href="#i-pause" /></svg>
+            </button>
+          </div>
+          <button id="stage-select" class="stage-select" title="打开关卡目录与存档">
+            <span class="stage-library">关卡目录 ▦</span>
+          </button>
+        </div>
+        <div class="game-layout">
+          <div class="board-column">
+            <div class="board-meta">
+              <div class="difficulty-group" aria-label="难度">
+                <button data-level="easy" class="level active" aria-pressed="true">轻松</button
+                ><button data-level="medium" class="level" aria-pressed="false">适中</button
+                ><button data-level="hard" class="level" aria-pressed="false">挑战</button>
+              </div>
+              <div class="board-view-tools" id="board-view-tools">
+                <span id="selected-location" hidden></span>
+                <div class="zoom-controls">
+                  <button id="zoom-out" aria-label="缩小棋盘" title="缩小 25%">−</button
+                  ><button
+                    id="zoom-percent"
+                    aria-label="调节缩放比例"
+                    aria-expanded="false"
+                    aria-controls="zoom-popover"
+                    title="拖动滑杆调节缩放"
+                  >
+                    <output id="zoom-value" for="zoom-range">100%</output
+                    ><span aria-hidden="true">⌄</span></button
+                  ><button id="zoom-in" aria-label="放大棋盘" title="放大 25%">＋</button
+                  ><button id="zoom-reset" title="恢复全览棋盘">全览</button>
+                  <div
+                    id="zoom-popover"
+                    class="zoom-popover"
+                    role="region"
+                    aria-label="缩放调节"
+                    hidden
+                  >
+                    <input
+                      id="zoom-range"
+                      type="range"
+                      min="100"
+                      max="300"
+                      step="1"
+                      value="100"
+                      aria-label="棋盘缩放比例"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="board-viewport" id="board-viewport">
+              <div class="board-frame">
+                <div
+                  id="board"
+                  class="board"
+                  role="group"
+                  aria-label="数独棋盘，使用方向键移动，数字键填写"
+                ></div>
+                <div id="pause-cover" class="pause-cover" hidden>
+                  <svg><use href="#i-sun" /></svg>
+                  <h3>已暂停</h3>
+                  <button id="resume" class="primary-button">
+                    <svg><use href="#i-play" /></svg>继续游戏
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="play-panel" aria-label="数字输入与工具">
+            <div class="progress-block">
+              <div>
+                <span class="progress-count" aria-label="已填与待填格数"
+                  ><strong id="filled">0</strong><span> / <span id="total">39</span></span></span
+                >
+              </div>
+              <div
+                class="progress-track"
+                role="progressbar"
+                aria-label="填写进度"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+              >
+                <span id="progress-fill"></span>
+              </div>
+            </div>
+            <div class="input-dock" id="input-dock" role="region" aria-label="数字键盘" hidden>
+              <div class="keypad-heading">
+                <span>数字键盘</span
+                ><button id="keypad-close" aria-label="收起数字键盘" title="收起数字键盘">×</button>
+              </div>
+              <button id="notes-toggle" class="notes-toggle" aria-pressed="false">
+                <span class="notes-label"
+                  ><svg><use href="#i-pencil" /></svg>草稿</span
+                ><span class="switch" aria-hidden="true"><span></span></span>
+              </button>
+              <div class="tools">
+                <button id="undo" title="撤销（Ctrl / ⌘ + Z）" disabled>
+                  <svg><use href="#i-undo" /></svg><span>撤销</span></button
+                ><button id="erase" title="擦除（Backspace / Delete）">
+                  <svg><use href="#i-erase" /></svg><span>擦除</span></button
+                ><button id="hint" title="查看这一步的解题思路">
+                  <svg><use href="#i-bulb" /></svg><span>提示</span>
+                </button>
+              </div>
+              <div id="keypad" class="keypad" aria-label="独立数字键盘"></div>
+            </div>
+            <button id="new-game" class="new-game">
+              下一关<svg><use href="#i-arrow" /></svg>
+            </button>
+          </aside>
+        </div>
+      </section>
+    </main>
+    <button
+      id="keypad-toggle"
+      class="keypad-launcher"
+      aria-expanded="false"
+      aria-controls="input-dock"
+      hidden
+    >
+      <svg aria-hidden="true" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="16" rx="3" />
+        <path d="M7 9h.01M12 9h.01M17 9h.01M7 13h.01M12 13h.01M17 13h.01M8 17h8" /></svg
+      ><span id="keypad-toggle-label">数字键盘</span>
+    </button>
+
+    <dialog id="modal" aria-labelledby="modal-title">
+      <div class="dialog-content">
+        <button class="dialog-close" id="modal-close" aria-label="关闭">×</button
+        ><span class="dialog-symbol" id="modal-symbol" aria-hidden="true">✳</span>
+        <h2 id="modal-title"></h2>
+        <div id="modal-body"></div>
+        <div id="modal-actions" class="modal-actions"></div>
+      </div>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </body>
+</html>
